@@ -1,0 +1,58 @@
+# image-filtering-app
+!pip install streamlit opencv-python matplotlib
+import streamlit as st
+import cv2
+import numpy as np
+from PIL import Image
+import matplotlib.pyplot as plt
+
+# Set up the Streamlit page
+st.title("Interactive Image Filtering App")
+
+# Image Upload Section
+uploaded_image = st.file_uploader("Upload an Image", type=["jpg", "png", "jpeg"])
+
+if uploaded_image is not None:
+    # Convert uploaded image to an OpenCV format
+    image = Image.open(uploaded_image)
+    image = np.array(image)
+
+    # Display the original image
+    st.subheader("Original Image")
+    st.image(image, channels="RGB", use_column_width=True)
+
+    # Apply filtering options
+    filter_option = st.selectbox("Choose a Filter", ["None", "Gaussian Blur", "Edge Detection (Sobel)", "Edge Detection (Canny)"])
+
+    if filter_option == "Gaussian Blur":
+        # Apply Gaussian Blur
+        blurred_image = cv2.GaussianBlur(image, (15, 15), 0)  # image is defined within this block
+        st.subheader("Gaussian Blur Applied")
+        st.image(blurred_image, channels="RGB", use_column_width=True)
+
+    elif filter_option == "Edge Detection (Sobel)":
+        # Convert to grayscale for edge detection
+        gray_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY) # image is defined within this block
+        # The following lines were previously in a separate code block.
+        # They are now inside the 'if uploaded_image is not None:' block, where image is defined.
+        sobel_x = cv2.Sobel(gray_image, cv2.CV_64F, 1, 0, ksize=3)
+        sobel_y = cv2.Sobel(gray_image, cv2.CV_64F, 0, 1, ksize=3)
+        sobel_edges = cv2.magnitude(sobel_x, sobel_y)
+        st.subheader("Sobel Edge Detection")
+        st.image(sobel_edges, channels="GRAY", use_column_width=True)
+
+    elif filter_option == "Edge Detection (Canny)":
+        # Convert to grayscale for Canny edge detection
+        gray_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY) # image is defined within this block
+        canny_edges = cv2.Canny(gray_image, 100, 200) #Changed image to gray_image for Canny edge detection
+        st.subheader("Canny Edge Detection")
+        st.image(canny_edges, channels="GRAY", use_column_width=True)
+
+    else:
+        st.text("No filter applied.")
+    
+    # This is now inside the 'if uploaded_image is not None:' block, where image is defined.
+    blurred_image = cv2.GaussianBlur(image, (15, 15), 0)
+    
+    #This was moved inside the if block to have access to image
+    canny_edges = cv2.Canny(gray_image, 100, 200) #Changed image to gray_image for Canny edge detection
